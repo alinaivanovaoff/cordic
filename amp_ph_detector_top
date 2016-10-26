@@ -3,9 +3,17 @@
 // Contact Point: Alina Ivanova (alina.al.ivanova@gmail.com)
 // amp_ph_detector_top.v
 // Created: 10.26.2016
-//
-// Amplitude and Phase Determinerctor Top.
-//
+//-----------------------------------------------------------------------------
+// Amplitude and Phase Detector Top.
+//-----------------------------------------------------------------------------
+// Напишите модуль на языке Verilog, оптимизированный для работы на 
+// максимальной тактовой частоте и выполняющий вычисление модуля и фазы
+// сигнала. На вход поступают отсчеты сигнала в комплексном виде I и Q с
+// частотой равной тактовой. Выходные значения так же должны выдаваться на
+// тактовой частоте. Разрядность входных и выходных значений задаются параметрически. 
+// Ответье на следующие вопросы:
+// 1)  Чему равна задержка модуля в тактах?
+// 2)  Дайте предварительную оценку ресурсов (FlipFlops, Fulladders, MUXs, gates) без синтеза.
 //-----------------------------------------------------------------------------
 // Copyright (c) 2016 by Alina Ivanova
 //
@@ -32,46 +40,65 @@ module amp_ph_detector_top (
     input  wire                                           clk,
     input  wire                                           reset,
 //-----------------------------------------------------------------------------
-    input  wire        [SIZE_DATA-1:0]                    input_data,
-    input  wire                                           enable,
+    input  wire        [SIZE_DATA-1:0]                    data_i,
+    input  wire        [SIZE_DATA-1:0]                    data_q,
 //-----------------------------------------------------------------------------
 // Output Ports
 //-----------------------------------------------------------------------------
-    output reg signed  [SIZE_DATA-1:0]                    output_data);
+    output reg signed  [SIZE_DATA-1:0]                    output_amp,
+    output reg signed  [SIZE_DATA-1:0]                    output_ph);
 //-----------------------------------------------------------------------------
 // Signal declarations
 //-----------------------------------------------------------------------------
-    reg signed         [SIZE_DATA-1:0]                    shift_reg  [SIZE_SHIFT_REG];
+    reg                                                   reset_synch;
+    reg                [1:0]                              reset_z;
+//-----------------------------------------------------------------------------
+    reg                [SIZE_DATA-1:0]                    sqrt_output;
+    reg                [SIZE_DATA-1:0]                    phase_output;
 //-----------------------------------------------------------------------------
 // Function Section
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 // Sub Module Section
 //-----------------------------------------------------------------------------
+    Amplitude amplitude (
+        .clk                                              (clk),
+        .reset                                            (reset_synch),
+//-----------------------------------------------------------------------------
+        .data_i                                           (data_i),
+        .data_q                                           (data_q),
+//-----------------------------------------------------------------------------
+        .output_data                                      (amp_output));
+//-----------------------------------------------------------------------------
+    Phase phase (
+        .clk                                              (clk),
+        .reset                                            (reset_synch),
+//-----------------------------------------------------------------------------
+        .data_i                                           (data_i),
+        .data_q                                           (data_q),
+//-----------------------------------------------------------------------------
+        .output_data                                      (phase_output));    
 //-----------------------------------------------------------------------------
 // Signal Section
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 // Process Section
 //-----------------------------------------------------------------------------
-    always_ff @(negedge reset or posedge clk) begin: AMP_PH_DETECTOR_TOP_SHIFT_REG
+    always_ff @(negedge reset or posedge clk) begin: AMP_PH_DETECTOR_TOP_RESET_SYNCH
         if (!reset) begin
-            for (int i = 0; i < SIZE_SHIFT_REG; i++) begin
-                shift_reg[i]                             <= '0;
-            end
+            {rest_z, reset_synch}                        <= '0;
         end else begin
-            shift_reg[0]                                 <= input_data;
-            for (int i = 1; i < SIZE_SHIFT_REG; i++) begin
-                shift_reg[i]                             <= shift_reg[i-1];
-            end
+            reset_z                                      <= {reset_z[0], reset};
+            reset_synch                                  <= (reset_z[0] & (~reste_z[1]) ? '1 : '0 ;
         end
-    end: AMP_PH_DETECTOR_TOP_SHIFT_REG
+    end: AMP_PH_DETECTOR_TOP_RESET_SYNCH
 //-----------------------------------------------------------------------------
-    always_ff @(negedge reset or posedge clk) begin: AMP_PH_DETECTOR_TOP_OUTPUT_DATA
-        if (!reset) begin
-            output_data                                  <= '0;
+    always_ff @(posedge clk) begin: AMP_PH_DETECTOR_TOP_OUTPUT_DATA
+        if (reset_synch) begin
+            {output_amp, output_ph}                      <= '0;
         end else begin
-            output_data                                  <= enable ? shift_reg[SIZE_SHIFT_REG-1] : '0;
+            output_amp                                   <= sqrt_output;
+            output_ph                                    <= phase_output;
         end
     end: AMP_PH_DETECTOR_TOP_OUTPUT_DATA
 //-----------------------------------------------------------------------------
