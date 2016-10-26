@@ -4,7 +4,7 @@
 // amp_ph_detector_top.v
 // Created: 10.26.2016
 //-----------------------------------------------------------------------------
-// Amplitude and Phase Detector Top.
+// Amplitude and Phase Detector Top Module.
 //-----------------------------------------------------------------------------
 // Напишите модуль на языке Verilog, оптимизированный для работы на 
 // максимальной тактовой частоте и выполняющий вычисление модуля и фазы
@@ -45,15 +45,15 @@ module amp_ph_detector_top (
 //-----------------------------------------------------------------------------
 // Output Ports
 //-----------------------------------------------------------------------------
-    output reg signed  [SIZE_DATA-1:0]                    output_amp,
-    output reg signed  [SIZE_DATA-1:0]                    output_ph);
+    output reg         [SIZE_DATA-1:0]                    output_amp,
+    output reg         [SIZE_DATA-1:0]                    output_ph);
 //-----------------------------------------------------------------------------
 // Signal declarations
 //-----------------------------------------------------------------------------
     reg                                                   reset_synch;
     reg                [1:0]                              reset_z;
 //-----------------------------------------------------------------------------
-    reg                [SIZE_DATA-1:0]                    sqrt_output;
+    reg                [SIZE_DATA-1:0]                    amp_output;
     reg                [SIZE_DATA-1:0]                    phase_output;
 //-----------------------------------------------------------------------------
 // Function Section
@@ -97,7 +97,7 @@ module amp_ph_detector_top (
         if (reset_synch) begin
             {output_amp, output_ph}                      <= '0;
         end else begin
-            output_amp                                   <= sqrt_output;
+            output_amp                                   <= amp_output;
             output_ph                                    <= phase_output;
         end
     end: AMP_PH_DETECTOR_TOP_OUTPUT_DATA
