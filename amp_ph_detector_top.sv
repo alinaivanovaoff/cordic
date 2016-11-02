@@ -51,7 +51,7 @@ module amp_ph_detector_top (
 // Signal declarations
 //-----------------------------------------------------------------------------
     reg                                                   reset_synch;
-    reg                [1:0]                              reset_z;
+    reg                [2:0]                              reset_z;
 //-----------------------------------------------------------------------------
     reg                [SIZE_DATA-1:0]                    amp_output;
     reg                [SIZE_DATA-1:0]                    phase_output;
@@ -85,12 +85,8 @@ module amp_ph_detector_top (
 // Process Section
 //-----------------------------------------------------------------------------
     always_ff @(negedge reset or posedge clk) begin: AMP_PH_DETECTOR_TOP_RESET_SYNCH
-        if (!reset) begin
-            {rest_z, reset_synch}                        <= '0;
-        end else begin
-            reset_z                                      <= {reset_z[0], reset};
-            reset_synch                                  <= (reset_z[0] & (~reste_z[1]) ? '1 : '0 ;
-        end
+        reset_z                                         <= {reset_z[1:0], reset};
+        reset_synch                                     <= (reset_z[1] & (~reste_z[2]) ? '1 : '0 ;
     end: AMP_PH_DETECTOR_TOP_RESET_SYNCH
 //-----------------------------------------------------------------------------
     always_ff @(posedge clk) begin: AMP_PH_DETECTOR_TOP_OUTPUT_DATA

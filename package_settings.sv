@@ -25,6 +25,14 @@ package package_settings;
 //-----------------------------------------------------------------------------
 // Parameter Declaration(s)
 //-----------------------------------------------------------------------------
-    parameter SIZE_DATA                       = 16;
+    parameter SIZE_DATA                       = 16; 
+    parameter SIZE_FRAC                       = 16;
+    parameter FULL_SIZE                       = SIZE_FRAC + SIZE_DATA;
+//-----------------------------------------------------------------------------
+	parameter STAGES                          = 16;
+//-----------------------------------------------------------------------------
+	parameter K                               = 0.607252935;
+	parameter logic [FULL_SIZE-1:0] K_SCALED  = K * ({{FULL_SIZE-2{0}}, 1'b1} << SIZE_FRAC);
 //-----------------------------------------------------------------------------
 endpackage: package_settings
+                                                

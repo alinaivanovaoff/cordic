@@ -32,7 +32,8 @@ module arc_tg (
     input  wire                                           clk,
     input  wire                                           reset,
 //-----------------------------------------------------------------------------
-    input  wire        [SIZE_DATA-1:0]                    input_data,
+    input  wire        [SIZE_DATA-1:0]                    data_i,
+    input  wire        [SIZE_DATA-1:0]                    data_q,
 //-----------------------------------------------------------------------------
 // Output Ports
 //-----------------------------------------------------------------------------
@@ -52,7 +53,8 @@ module arc_tg (
         .clk                                              (clk),
         .reset                                            (reset),
 //-----------------------------------------------------------------------------
-        .input_data                                       (input_data),
+        .data_i                                           (data_i),
+        .data_q                                           (data_q),
 //-----------------------------------------------------------------------------
         .argument                                         (cordic_argument),
         .output_data                                      (cordic_output));
