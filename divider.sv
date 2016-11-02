@@ -1,10 +1,10 @@
 //-----------------------------------------------------------------------------
 // Original Author: Alina Ivanova
 // Contact Point: Alina Ivanova (alina.al.ivanova@gmail.com)
-// amp_ph_detector_top.v
+// divider.v
 // Created: 10.26.2016
 //
-// Amplitude and Phase Determinerctor Top.
+// Divider.
 //
 //-----------------------------------------------------------------------------
 // Copyright (c) 2016 by Alina Ivanova
@@ -25,23 +25,22 @@
 //----------------------------------------------------------------------------- 
 import package_settings::*;
 //-----------------------------------------------------------------------------
-module amp_ph_detector_top (
+module divider (
 //-----------------------------------------------------------------------------
 // Input Ports
 //-----------------------------------------------------------------------------
     input  wire                                           clk,
     input  wire                                           reset,
 //-----------------------------------------------------------------------------
-    input  wire        [SIZE_DATA-1:0]                    input_data,
-    input  wire                                           enable,
+    input  wire        [SIZE_DATA-1:0]                    dividend,
+    input  wire        [SIZE_DATA-1:0]                    divisor,
 //-----------------------------------------------------------------------------
 // Output Ports
 //-----------------------------------------------------------------------------
-    output reg signed  [SIZE_DATA-1:0]                    output_data);
+    output reg signed  [SIZE_DATA-1:0]                    quotient);
 //-----------------------------------------------------------------------------
 // Signal declarations
 //-----------------------------------------------------------------------------
-    reg signed         [SIZE_DATA-1:0]                    shift_reg  [SIZE_SHIFT_REG];
 //-----------------------------------------------------------------------------
 // Function Section
 //-----------------------------------------------------------------------------
@@ -54,25 +53,12 @@ module amp_ph_detector_top (
 //-----------------------------------------------------------------------------
 // Process Section
 //-----------------------------------------------------------------------------
-    always_ff @(negedge reset or posedge clk) begin: AMP_PH_DETECTOR_TOP_SHIFT_REG
-        if (!reset) begin
-            for (int i = 0; i < SIZE_SHIFT_REG; i++) begin
-                shift_reg[i]                             <= '0;
-            end
+    always_ff @(posedge clk) begin: divider_OUTPUT_DATA
+        if (reset) begin
+            quotient                                     <= '0;
         end else begin
-            shift_reg[0]                                 <= input_data;
-            for (int i = 1; i < SIZE_SHIFT_REG; i++) begin
-                shift_reg[i]                             <= shift_reg[i-1];
-            end
+            quotient                                     <= dividend/divisor;
         end
-    end: AMP_PH_DETECTOR_TOP_SHIFT_REG
+    end: divider_OUTPUT_DATA
 //-----------------------------------------------------------------------------
-    always_ff @(negedge reset or posedge clk) begin: AMP_PH_DETECTOR_TOP_OUTPUT_DATA
-        if (!reset) begin
-            output_data                                  <= '0;
-        end else begin
-            output_data                                  <= enable ? shift_reg[SIZE_SHIFT_REG-1] : '0;
-        end
-    end: AMP_PH_DETECTOR_TOP_OUTPUT_DATA
-//-----------------------------------------------------------------------------
-endmodule: amp_ph_detector_top
+endmodule: divider
