@@ -1,10 +1,10 @@
 //-----------------------------------------------------------------------------
 // Original Author: Alina Ivanova
 // Contact Point: Alina Ivanova (alina.al.ivanova@gmail.com)
-// arc_tg.v
-// Created: 10.26.2016
+// amp_ph_detector_top_testbench.sv
+// Created: 11.01.2016
 //
-// Arctg calculation.
+// Testbench for amp_ph_detector_top.sv.
 //
 //-----------------------------------------------------------------------------
 // Copyright (c) 2016 by Alina Ivanova
@@ -22,54 +22,57 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-----------------------------------------------------------------------------
 `timescale 1 ns / 1 ps
-//----------------------------------------------------------------------------- 
-import package_settings::*;
 //-----------------------------------------------------------------------------
-module arc_tg (
+`include "interfaces_pkg.sv";
+`include "amp_ph_test_program.sv"
 //-----------------------------------------------------------------------------
-// Input Ports
+module amp_ph_detector_top_testbench ();
 //-----------------------------------------------------------------------------
-    input  wire                                           clk,
-    input  wire                                           reset,
+// Variable declarations
 //-----------------------------------------------------------------------------
-    input  wire        [SIZE_DATA-1:0]                    data_i,
-    input  wire        [SIZE_DATA-1:0]                    data_q,
+    logic                                                 clk;
+    logic                                                 reset;
 //-----------------------------------------------------------------------------
-// Output Ports
+    amp_ph_detector_data_intf ICKData (
+        .clk                                              (clk),
+        .reset                                            (reset));
 //-----------------------------------------------------------------------------
-    output reg signed  [SIZE_DATA-1:0]                    output_data);
-//-----------------------------------------------------------------------------
-// Signal declarations
-//-----------------------------------------------------------------------------
-    reg signed         [SIZE_DATA-1:0]                    cordic_argument;
-    reg signed         [SIZE_DATA-1:0]                    cordic_output;
+    amp_ph_detector_result_intf ICKResult ();
 //-----------------------------------------------------------------------------
 // Function Section
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+// Process Section
+//-----------------------------------------------------------------------------
+    initial begin: AMP_PH_DETECTOR_TOP_TESTBENCH_INITIAL
+        $display("Running testbench");
+        reset                                             = 0;
+        clk                                               = 0;
+        #4  reset                                         = 1;
+    end: AMP_PH_DETECTOR_TOP_TESTBENCH_INITIAL
+//-----------------------------------------------------------------------------
+    always begin: AMP_PH_DETECTOR_TOP_TESTBENCH_CLK
+        #2 clk                                            = ~clk;
+    end: AMP_PH_DETECTOR_TOP_TESTBENCH_CLK
+//-----------------------------------------------------------------------------
 // Sub Module Section
 //-----------------------------------------------------------------------------
-    CordicKernel cordic_kernel (
+    amp_ph_detector_top AmpPhDetectorTop (
         .clk                                              (clk),
         .reset                                            (reset),
 //-----------------------------------------------------------------------------
-        .data_i                                           (data_i),
-        .data_q                                           (data_q),
+        .data_i                                           (ICKData.data_i),
+        .data_q                                           (ICKData.data_q),
+        .enable                                           (ICKData.enable),
 //-----------------------------------------------------------------------------
-        .argument                                         (cordic_argument),
-        .output_data                                      (cordic_output));
+        .output_amp                                       (ICKResult.output_amp),
+        .output_ph                                        (ICKResult.output_ph),
+        .output_data_valid                                (ICKResult.output_data_valid));
 //-----------------------------------------------------------------------------
-// Signal Section
+// Program Section
 //-----------------------------------------------------------------------------
+    amp_ph_test_program AmpPhTestProgram (
+        .ICKData   (ICKData.master),
+        .ICKResult (ICKResult.slave));
 //-----------------------------------------------------------------------------
-// Process Section
-//-----------------------------------------------------------------------------
-    always_ff @(posedge clk) begin: ARC_TG_OUTPUT_DATA
-        if (reset) begin
-            output_data                                  <= '0;
-        end else begin
-            output_data                                  <= cordic_output;
-        end
-    end: ARC_TG_OUTPUT_DATA
-//-----------------------------------------------------------------------------
-endmodule: arc_tg
+endmodule: amp_ph_detector_top_testbench

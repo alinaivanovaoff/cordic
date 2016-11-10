@@ -1,10 +1,10 @@
 //-----------------------------------------------------------------------------
 // Original Author: Alina Ivanova
 // Contact Point: Alina Ivanova (alina.al.ivanova@gmail.com)
-// package_setting.v
+// functions_pkg.sv
 // Created: 10.26.2016
 //
-// Package setting.
+// Functions package.
 //
 //-----------------------------------------------------------------------------
 // Copyright (c) 2016 by Alina Ivanova
@@ -21,18 +21,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-----------------------------------------------------------------------------
-package package_settings;
-//-----------------------------------------------------------------------------
-// Parameter Declaration(s)
-//-----------------------------------------------------------------------------
-    parameter SIZE_DATA                       = 16; 
-    parameter SIZE_FRAC                       = 16;
-    parameter FULL_SIZE                       = SIZE_FRAC + SIZE_DATA;
-//-----------------------------------------------------------------------------
-	parameter STAGES                          = 16;
-//-----------------------------------------------------------------------------
-	parameter K                               = 0.607252935;
-	parameter logic [FULL_SIZE-1:0] K_SCALED  = K * ({{FULL_SIZE-2{0}}, 1'b1} << SIZE_FRAC);
-//-----------------------------------------------------------------------------
-endpackage: package_settings
-                                                
+package functions_pkg;
+   function integer clog2(input integer value);
+      value -= 1;
+      for (clog2 = 0; value > 0; clog2++) begin
+         value = value >> 1;
+      end
+   endfunction: clog2
+endpackage: functions_pkg

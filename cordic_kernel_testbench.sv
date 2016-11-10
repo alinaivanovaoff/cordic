@@ -1,10 +1,10 @@
 //-----------------------------------------------------------------------------
 // Original Author: Alina Ivanova
 // Contact Point: Alina Ivanova (alina.al.ivanova@gmail.com)
-// divider.v
-// Created: 10.26.2016
+// cordic_kernel_testbench.sv
+// Created: 11.01.2016
 //
-// Divider.
+// Testbench for cordic_kernel.sv.
 //
 //-----------------------------------------------------------------------------
 // Copyright (c) 2016 by Alina Ivanova
@@ -22,43 +22,60 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-----------------------------------------------------------------------------
 `timescale 1 ns / 1 ps
-//----------------------------------------------------------------------------- 
-import package_settings::*;
 //-----------------------------------------------------------------------------
-module divider (
+//`include "settings_pkg.sv"
+`include "interfaces_pkg.sv";
+`include "cordic_kernel_test_program.sv"
 //-----------------------------------------------------------------------------
-// Input Ports
+module cordic_kernel_testbench ();
 //-----------------------------------------------------------------------------
-    input  wire                                           clk,
-    input  wire                                           reset,
+// Variable declarations
 //-----------------------------------------------------------------------------
-    input  wire        [SIZE_DATA-1:0]                    dividend,
-    input  wire        [SIZE_DATA-1:0]                    divisor,
+    logic                                                 clk;
+    logic                                                 reset;
 //-----------------------------------------------------------------------------
-// Output Ports
+    cordic_kernel_data_intf ICKData (
+        .clk                                              (clk),
+        .reset                                            (reset));
 //-----------------------------------------------------------------------------
-    output reg signed  [SIZE_DATA-1:0]                    quotient);
-//-----------------------------------------------------------------------------
-// Signal declarations
-//-----------------------------------------------------------------------------
+    cordic_kernel_result_intf ICKResult ();
 //-----------------------------------------------------------------------------
 // Function Section
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-// Sub Module Section
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-// Signal Section
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 // Process Section
 //-----------------------------------------------------------------------------
-    always_ff @(posedge clk) begin: divider_OUTPUT_DATA
-        if (reset) begin
-            quotient                                     <= '0;
-        end else begin
-            quotient                                     <= dividend/divisor;
-        end
-    end: divider_OUTPUT_DATA
+    initial begin: CORDIC_KERNEL_TESTBENCH_INITIAL
+        $display("Running testbench");
+        reset                                             = 0;
+        clk                                               = 0;
+        #4  reset                                         = 1;
+        #4  reset                                         = 0;
+    end: CORDIC_KERNEL_TESTBENCH_INITIAL
 //-----------------------------------------------------------------------------
-endmodule: divider
+    always begin: CORDIC_KERNEL_TESTBENCH_CLK
+        #2 clk                                            = ~clk;
+    end: CORDIC_KERNEL_TESTBENCH_CLK
+//-----------------------------------------------------------------------------
+// Sub Module Section
+//-----------------------------------------------------------------------------
+    cordic_kernel CordicKernel (
+        .clk                                              (clk),
+        .reset                                            (reset),
+//-----------------------------------------------------------------------------
+        .data_i                                           (ICKData.data_i),
+        .data_q                                           (ICKData.data_q),
+        .enable                                           (ICKData.enable),
+//-----------------------------------------------------------------------------
+        .output_data_i                                    (ICKResult.output_data_i),
+        .output_data_q                                    (ICKResult.output_data_q),
+        .output_data_theta                                (ICKResult.output_data_theta),
+        .output_data_valid                                (ICKResult.output_data_valid));
+//-----------------------------------------------------------------------------
+// Program Section
+//-----------------------------------------------------------------------------
+    cordic_kernel_test_program CordicKernelTestProgram (
+        .ICKData   (ICKData.master),
+        .ICKResult (ICKResult.slave));
+//-----------------------------------------------------------------------------
+endmodule: cordic_kernel_testbench
