@@ -22,22 +22,22 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-----------------------------------------------------------------------------
 `timescale 1 ns / 1 ps
-//----------------------------------------------------------------------------- 
-import package_settings::*;
-include "interface_cordic_kernel.sv";
+//-----------------------------------------------------------------------------
+`include "interfaces_pkg.sv";
+`include "program_test_cordic_kernel.sv"
 //-----------------------------------------------------------------------------
 module testbench_cordic_kernel ();
 //-----------------------------------------------------------------------------
 // Variable declarations
 //-----------------------------------------------------------------------------
     logic                                                 clk;
-    logic                                                 reset_n;
+    logic                                                 reset;
 //-----------------------------------------------------------------------------
-    interface_cordic_kernel_data ICKData (
+    cordic_kernel_data_intf ICKData (
         .clk                                              (clk),
-        .reset_n                                          (reset_n));
+        .reset                                            (reset));
 //-----------------------------------------------------------------------------
-    interface_cordic_kernel_data ICKResult ();
+    cordic_kernel_result_intf ICKResult ();
 //-----------------------------------------------------------------------------
 // Function Section
 //-----------------------------------------------------------------------------
@@ -46,33 +46,35 @@ module testbench_cordic_kernel ();
 //-----------------------------------------------------------------------------
     initial begin: TEST_CORDIC_KERNEL_INITIAL
         $display("Running testbench");
-        #10 reset_n                                      <= 0;
-        #10 reset_n                                      <= 1;
+        reset                                             = 0;
+        clk                                               = 0;
+        #4  reset                                         = 1;
+        #4  reset                                         = 0;
     end: TEST_CORDIC_KERNEL_INITIAL
 //-----------------------------------------------------------------------------
     always begin: TEST_CORDIC_KERNEL_CLK
-        #2 clk                                           <= ~clk;
+        #2 clk                                            = ~clk;
     end: TEST_CORDIC_KERNEL_CLK
 //-----------------------------------------------------------------------------
 // Sub Module Section
 //-----------------------------------------------------------------------------
     cordic_kernel CordicKernel (
         .clk                                              (clk),
-        .reset                                            (reset_n),
+        .reset                                            (reset),
 //-----------------------------------------------------------------------------
-        .data_i                                           (ICKData.slave.data_i),
-        .data_q                                           (ICKData.slave.data_q),
-        .enable                                           (ICKData.slave.enable),
+        .data_i                                           (ICKData.data_i),
+        .data_q                                           (ICKData.data_q),
+        .enable                                           (ICKData.enable),
 //-----------------------------------------------------------------------------
-        .output_data_i                                    (ICKResult.slave.output_data_i),
-        .output_data_q                                    (ICKResult.slave.output_data_q),
-        .output_data_theta                                (ICKResult.slave.output_data_theta),
-        .output_data_valid                                (ICKResult.slaveoutput_data_valid));
+        .output_data_i                                    (ICKResult.output_data_i),
+        .output_data_q                                    (ICKResult.output_data_q),
+        .output_data_theta                                (ICKResult.output_data_theta),
+        .output_data_valid                                (ICKResult.output_data_valid));
 //-----------------------------------------------------------------------------
 // Program Section
 //-----------------------------------------------------------------------------
-    test Test(
+    program_test_cordic_kernel ProgramTestCordicKernel(
         .ICKData   (ICKData.master),
-        .ICKResult (ICKResult.master));
+        .ICKResult (ICKResult.slave));
 //-----------------------------------------------------------------------------
 endmodule: testbench_cordic_kernel

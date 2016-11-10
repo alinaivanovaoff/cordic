@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Original Author: Alina Ivanova
 // Contact Point: Alina Ivanova (alina.al.ivanova@gmail.com)
-// cordic_kernel_testbench_program.v
+// cordic_kernel_testbench_program.sv
 // Created: 10.26.2016
 //
 // Program for CORDIC Kernel Testbench.

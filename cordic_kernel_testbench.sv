@@ -1,10 +1,10 @@
 //-----------------------------------------------------------------------------
 // Original Author: Alina Ivanova
 // Contact Point: Alina Ivanova (alina.al.ivanova@gmail.com)
-// amplitude.v
-// Created: 10.26.2016
+// cordic_kernel_testbench.sv
+// Created: 11.01.2016
 //
-// Amplitude detector.
+// Testbench for cordic_kernel.sv.
 //
 //-----------------------------------------------------------------------------
 // Copyright (c) 2016 by Alina Ivanova
@@ -22,63 +22,60 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-----------------------------------------------------------------------------
 `timescale 1 ns / 1 ps
-//----------------------------------------------------------------------------- 
-module amplitude import settings_pkg::*; (
 //-----------------------------------------------------------------------------
-// Input Ports
+//`include "settings_pkg.sv"
+`include "interfaces_pkg.sv";
+`include "cordic_kernel_test_program.sv"
 //-----------------------------------------------------------------------------
-    input  wire                                           clk,
-    input  wire                                           reset,
+module cordic_kernel_testbench ();
 //-----------------------------------------------------------------------------
-    input  wire        [SIZE_DATA-1:0]                    data_i,
-    input  wire        [SIZE_DATA-1:0]                    data_q,
+// Variable declarations
 //-----------------------------------------------------------------------------
-// Output Ports
+    logic                                                 clk;
+    logic                                                 reset;
 //-----------------------------------------------------------------------------
-    output reg signed  [SIZE_DATA-1:0]                    output_data);
+    cordic_kernel_data_intf ICKData (
+        .clk                                              (clk),
+        .reset                                            (reset));
 //-----------------------------------------------------------------------------
-// Signal declarations
-//-----------------------------------------------------------------------------
-    reg                [SIZE_DATA-1:0]                    data_i_square;
-    reg                [SIZE_DATA-1:0]                    data_q_square;
-    reg                [SIZE_DATA-1:0]                    data_square_sum;
-//-----------------------------------------------------------------------------
-    reg                [SIZE_DATA-1:0]                    sqrt_output;   
+    cordic_kernel_result_intf ICKResult ();
 //-----------------------------------------------------------------------------
 // Function Section
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+// Process Section
+//-----------------------------------------------------------------------------
+    initial begin: CORDIC_KERNEL_TESTBENCH_INITIAL
+        $display("Running testbench");
+        reset                                             = 0;
+        clk                                               = 0;
+        #4  reset                                         = 1;
+        #4  reset                                         = 0;
+    end: CORDIC_KERNEL_TESTBENCH_INITIAL
+//-----------------------------------------------------------------------------
+    always begin: CORDIC_KERNEL_TESTBENCH_CLK
+        #2 clk                                            = ~clk;
+    end: CORDIC_KERNEL_TESTBENCH_CLK
+//-----------------------------------------------------------------------------
 // Sub Module Section
 //-----------------------------------------------------------------------------
-    Sqrt sqrt (
+    cordic_kernel CordicKernel (
         .clk                                              (clk),
         .reset                                            (reset),
 //-----------------------------------------------------------------------------
-        .input_data                                       (data_square_sum),
+        .data_i                                           (ICKData.data_i),
+        .data_q                                           (ICKData.data_q),
+        .enable                                           (ICKData.enable),
 //-----------------------------------------------------------------------------
-        .output_data                                      (sqrt_output));
+        .output_data_i                                    (ICKResult.output_data_i),
+        .output_data_q                                    (ICKResult.output_data_q),
+        .output_data_theta                                (ICKResult.output_data_theta),
+        .output_data_valid                                (ICKResult.output_data_valid));
 //-----------------------------------------------------------------------------
-// Signal Section
+// Program Section
 //-----------------------------------------------------------------------------
+    cordic_kernel_test_program CordicKernelTestProgram (
+        .ICKData   (ICKData.master),
+        .ICKResult (ICKResult.slave));
 //-----------------------------------------------------------------------------
-// Process Section
-//-----------------------------------------------------------------------------
-    always_ff @(posedge clk) begin: AMPLITUDE_DATA_SQUARE
-        if (reset) begin
-            {data_i_square, data_q_square, data_square_sum} <= '0;
-        end else begin
-            data_i_square                                <= data_i * data_i;
-            data_q_square                                <= data_q * data_q;
-            data_square_sum                              <= data_i_square + data_q_square;
-        end
-    end: AMPLITUDE_TOP_OUTPUT_DATA
-//-----------------------------------------------------------------------------
-    always_ff @(posedge clk) begin: AMPLITUDE_OUTPUT_DATA
-        if (reset) begin
-            output_data                                  <= '0;
-        end else begin
-            output_data                                  <= sqrt_output;
-        end
-    end: AMPLITUDE_OUTPUT_DATA
-//-----------------------------------------------------------------------------
-endmodule: amplitude
+endmodule: cordic_kernel_testbench

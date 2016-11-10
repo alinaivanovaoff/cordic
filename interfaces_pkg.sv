@@ -22,25 +22,43 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-----------------------------------------------------------------------------
 `timescale 1 ns / 1 ps
-//----------------------------------------------------------------------------- 
-interface cordic_kernel_data_intf (
+//-----------------------------------------------------------------------------
+interface amp_ph_detector_data_intf import settings_pkg::*; (
     input wire                                            clk,
     input wire                                            reset);
+    wire signed [DATA_SIZE-1:0]                           data_i;
+    wire signed [DATA_SIZE-1:0]                           data_q;
+    wire                                                  enable;
+    modport master                                        (output data_i, data_q, enable);
+    modport slave                                         (input  data_i, data_q, enable);
+endinterface: amp_ph_detector_data_intf
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+interface amp_ph_detector_result_intf import settings_pkg::*; ();
+    wire signed [FULL_SIZE-1:0]                           output_amp;
+    wire signed [FULL_SIZE-1:0]                           output_ph;
+    wire                                                  output_data_valid;
+    modport master                                        (output output_amp, output_ph, output_data_valid);
+    modport slave                                         (input  output_amp, output_ph, output_data_valid);
+endinterface: amp_ph_detector_result_intf
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+interface cordic_kernel_data_intf import settings_pkg::*; (
+    input wire                                            clk,
+    input wire                                            reset);
     wire signed [FULL_SIZE-1:0]                           data_i;
     wire signed [FULL_SIZE-1:0]                           data_q;
     wire                                                  enable;
-//-----------------------------------------------------------------------------
     modport master                                        (output data_i, data_q, enable);
     modport slave                                         (input  data_i, data_q, enable);
 endinterface: cordic_kernel_data_intf
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-interface cordic_kernel_result_intf ();
+interface cordic_kernel_result_intf import settings_pkg::*; ();
     wire signed [FULL_SIZE-1:0]                           output_data_i;
     wire signed [FULL_SIZE-1:0]                           output_data_q;
     wire signed [FULL_SIZE-1:0]                           output_data_theta;
     wire                                                  output_data_valid;
     modport master                                        (output output_data_i, output_data_q, output_data_theta, output_data_valid);
     modport slave                                         (input  output_data_i, output_data_q, output_data_theta, output_data_valid);
-endinterface: interface_cordic_kernel_result
+endinterface: cordic_kernel_result_intf
