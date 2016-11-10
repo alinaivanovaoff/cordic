@@ -1,6 +1,7 @@
 //-----------------------------------------------------------------------------
 // Original Author: Alina Ivanova
-// Contact Point: Alina Ivanova (alina.al.ivanova@gmail.com)
+// email: alina.al.ivanova@gmail.com
+// web: www.alinaivanovaoff.com
 // amp_ph_test_program.sv
 // Created: 10.26.2016
 //
@@ -34,7 +35,6 @@ program amp_ph_test_program import settings_pkg::*;  (
     logic [DATA_SIZE-1:0]                              data_i;
     logic [DATA_SIZE-1:0]                              data_q;
     logic [FULL_SIZE-1:0]                              precision;
-    logic [2*FULL_SIZE-1:0]                            precision_sq;
     logic                                              enable;
     logic                                              error;
 //-----------------------------------------------------------------------------
@@ -54,7 +54,8 @@ program amp_ph_test_program import settings_pkg::*;  (
     initial begin: AMP_PH_TEST_PROGRAM_INITIAL
         $display("Running program");
         @(posedge ICKData.reset);
-        $display("After reset");
+//        $display("After reset");
+        #12;
         data_i                                         = 9.205049 * ({{DATA_SIZE-2{1'b0}}, 1'b1} << FRAC_SIZE);
         data_q                                         = 3.907311 * ({{DATA_SIZE-2{1'b0}}, 1'b1} << FRAC_SIZE);
         precision                                      = 0.001    * ({{DATA_SIZE-2{1'b0}}, 1'b1} << FRAC_SIZE);

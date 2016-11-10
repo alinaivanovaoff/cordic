@@ -1,6 +1,7 @@
 //-----------------------------------------------------------------------------
 // Original Author: Alina Ivanova
-// Contact Point: Alina Ivanova (alina.al.ivanova@gmail.com)
+// email: alina.al.ivanova@gmail.com
+// web: www.alinaivanovaoff.com
 // amp_ph_detector_top.sv
 // Created: 10.26.2016
 //-----------------------------------------------------------------------------
@@ -80,8 +81,8 @@ module amp_ph_detector_top import settings_pkg::*; (
 // Process Section
 //-----------------------------------------------------------------------------
     always_ff @(posedge clk) begin: AMP_PH_DETECTOR_TOP_RESET_SYNCH
-        reset_z                                         <= {reset_z[1:0], reset};
-        reset_synch                                     <= (reset_z[1] & (~reset_z[2])) ? '1 : '0 ;
+        reset_z                                          <= {reset_z[1:0], reset};
+        reset_synch                                      <= (reset_z[1] & (~reset_z[2])) ? '1 : '0 ;
     end: AMP_PH_DETECTOR_TOP_RESET_SYNCH
 //-----------------------------------------------------------------------------
     always_ff @(posedge clk) begin: AMP_PH_DETECTOR_TOP_REGISTERS
