@@ -1,2 +1,2 @@
 # cordic
-CORDIC algorithm for calculate amplitude and phase for complex value
+CORDIC algorithm for calculation of amplitude and phase of complex value
